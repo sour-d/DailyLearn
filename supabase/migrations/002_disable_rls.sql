@@ -1,0 +1,14 @@
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM schema_migrations WHERE name = '002_disable_rls') THEN
+
+    ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE entries DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE review_history DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE daily_stats DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE app_config DISABLE ROW LEVEL SECURITY;
+    ALTER TABLE ai_generation_log DISABLE ROW LEVEL SECURITY;
+
+    INSERT INTO schema_migrations (name) VALUES ('002_disable_rls');
+  END IF;
+END $$;

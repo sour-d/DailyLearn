@@ -20,7 +20,23 @@ Personal daily learning companion built with Next.js (App Router) + Supabase + T
 
 ## Database Schema
 
-Full SQL: [`supabase/schema.sql`](supabase/schema.sql)
+Reference snapshot: [`supabase/schema.sql`](supabase/schema.sql) (read-only, not meant to be run directly)
+
+### Migrations
+
+Schema changes are managed via numbered migration files in `supabase/migrations/`. Each migration is a `DO $$` block guarded by a check against the `schema_migrations` table so it only runs once.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/001_initial_schema.sql` | Tables, indexes, triggers, seed data |
+| `supabase/migrations/002_disable_rls.sql` | Disable RLS for single-user app |
+| `supabase/migrate.sql` | Runner — paste into Supabase SQL Editor to apply all pending migrations |
+
+**Adding a new migration:**
+1. Create `supabase/migrations/NNN_description.sql` using the idempotent DO block pattern
+2. Append the corresponding block to `supabase/migrate.sql`
+3. Update `supabase/schema.sql` to reflect the full current state
+4. Run `migrate.sql` in Supabase SQL Editor — already-applied migrations are skipped
 
 ### Tables
 
@@ -116,7 +132,7 @@ Stored in `.env.local` (gitignored). Template: `.env.example`
 - Colors stored as hex strings
 - Icons stored as lucide icon name strings
 - Update README.md and AGENTS.md when schema or architecture changes
-- Update `supabase/schema.sql` when schema changes
+- Schema changes go in a new numbered migration file in `supabase/migrations/`, then append to `migrate.sql`, then update `schema.sql` reference
 
 ## Component Organization
 

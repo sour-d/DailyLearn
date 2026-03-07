@@ -1,10 +1,26 @@
 -- ============================================
--- Daily Learn - Database Schema
--- Run this in the Supabase SQL Editor to set up all tables.
+-- Daily Learn - Full Database Schema (REFERENCE ONLY)
+-- ============================================
+-- DO NOT run this file directly.
+-- Use  supabase/migrate.sql  instead — it applies
+-- numbered migrations idempotently.
+--
+-- This file is kept as a quick-reference snapshot of
+-- the current schema. It is regenerated from the
+-- migration files whenever a new migration is added.
 -- ============================================
 
 -- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ============================================
+-- Migration tracking
+-- ============================================
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  applied_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- ============================================
 -- 1. Categories

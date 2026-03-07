@@ -75,7 +75,7 @@ A personal daily learning companion that helps you learn and retain knowledge ac
    ```
    Fill in your Supabase URL, anon key, and OpenRouter API key.
 
-4. Set up the database -- run the SQL in [`supabase/schema.sql`](supabase/schema.sql) in your Supabase SQL Editor.
+4. Set up the database -- paste [`supabase/migrate.sql`](supabase/migrate.sql) into your Supabase SQL Editor and run it. This is safe to run repeatedly; it only applies migrations that haven't been applied yet.
 
 5. Start the dev server:
    ```bash
@@ -88,6 +88,7 @@ A personal daily learning companion that helps you learn and retain knowledge ac
 
 | Table | Purpose |
 |-------|---------|
+| `schema_migrations` | Tracks which migrations have been applied |
 | `categories` | Learning categories with color, icon, daily review limit |
 | `entries` | Learning items with SM-2 spaced repetition fields |
 | `review_history` | Per-review log with rating |
@@ -95,7 +96,11 @@ A personal daily learning companion that helps you learn and retain knowledge ac
 | `app_config` | Single-row config (streaks, daily goal) |
 | `ai_generation_log` | Tracks AI question generation usage |
 
-Full schema: [`supabase/schema.sql`](supabase/schema.sql)
+Full schema reference: [`supabase/schema.sql`](supabase/schema.sql)
+
+### Migrations
+
+Schema changes use numbered migration files that run once and are tracked in the `schema_migrations` table. See [`supabase/migrations/`](supabase/migrations/) for individual migration files and [`supabase/migrate.sql`](supabase/migrate.sql) as the all-in-one runner.
 
 ## Project Structure
 
@@ -139,5 +144,9 @@ src/
 │   ├── spaced-repetition.ts # SM-2 algorithm
 │   └── utils.ts            # cn() utility
 └── supabase/
-    └── schema.sql          # Full database schema
+    ├── migrations/
+    │   ├── 001_initial_schema.sql  # Tables, indexes, triggers, seed
+    │   └── 002_disable_rls.sql     # Disable RLS for single-user app
+    ├── migrate.sql                 # Runner: paste into SQL Editor to apply all
+    └── schema.sql                  # Full schema reference (read-only)
 ```
