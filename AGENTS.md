@@ -81,6 +81,17 @@ Stored in `.env.local` (gitignored). Template: `.env.example`
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client | Supabase anonymous key |
 | `OPENROUTER_API_KEY` | Server only | OpenRouter API key |
 | `OPENROUTER_MODEL` | Server only | Default model (e.g. google/gemini-2.0-flash-001) |
+| `APP_PIN` | Server only | 6-digit PIN for app access (session lasts 1 hour) |
+
+## Authentication
+
+Simple PIN-based auth. A 6-digit PIN in `APP_PIN` env var protects the entire app.
+
+- **Middleware** (`src/middleware.ts`) intercepts all requests; unauthenticated users redirect to `/login`
+- **Session**: HMAC-SHA256 signed token stored in an HTTP-only cookie, expires after 1 hour
+- **Auth lib** (`src/lib/auth.ts`): uses Web Crypto API (works in both Edge and Node runtimes)
+- **API routes**: `POST /api/auth/verify-pin` (login), `POST /api/auth/logout` (clear cookie)
+- If `APP_PIN` is not set, auth is skipped entirely
 
 ## Architecture
 
@@ -91,6 +102,8 @@ Stored in `.env.local` (gitignored). Template: `.env.example`
 - `src/app/_actions/` - Dashboard data (config, today stats, categories with stats)
 
 ### API Routes (server-side, keeps API keys secure)
+- `POST /api/auth/verify-pin` - PIN verification, sets session cookie
+- `POST /api/auth/logout` - Clears session cookie
 - `POST /api/generate` - AI question generation via OpenRouter
 - `POST /api/clean` - AI bulk content cleanup via OpenRouter
 

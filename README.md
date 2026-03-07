@@ -33,6 +33,7 @@ A personal daily learning companion that helps you learn and retain knowledge ac
 - **Learning streaks** -- Track current and longest streaks
 - **Statistics** -- Charts for daily activity, mastery distribution, per-category breakdown
 - **Dark mode** -- Full dark/light mode support with system detection
+- **PIN protection** -- 6-digit PIN lock with 1-hour sessions
 
 ## Tech Stack
 
@@ -73,7 +74,7 @@ A personal daily learning companion that helps you learn and retain knowledge ac
    ```bash
    cp .env.example .env.local
    ```
-   Fill in your Supabase URL, anon key, and OpenRouter API key.
+   Fill in your Supabase URL, anon key, OpenRouter API key, and a 6-digit `APP_PIN`.
 
 4. Set up the database -- paste [`supabase/migrate.sql`](supabase/migrate.sql) into your Supabase SQL Editor and run it. This is safe to run repeatedly; it only applies migrations that haven't been applied yet.
 
@@ -109,8 +110,10 @@ src/
 ├── app/
 │   ├── _actions/           # Dashboard server actions
 │   ├── api/
+│   │   ├── auth/            # PIN verify + logout endpoints
 │   │   ├── generate/       # AI question generation endpoint
 │   │   └── clean/          # AI bulk cleanup endpoint
+│   ├── login/              # PIN entry page
 │   ├── categories/
 │   │   ├── _actions/       # Category CRUD server actions
 │   │   ├── [id]/           # Category detail page
@@ -129,7 +132,7 @@ src/
 │   ├── categories/         # Category cards, forms, detail view
 │   ├── dashboard/          # Dashboard view
 │   ├── entries/            # Entry forms, table, markdown renderer
-│   ├── layout/             # Sidebar, mobile nav, theme toggle
+│   ├── layout/             # AppShell, sidebar, mobile nav, theme toggle
 │   ├── review/             # Flashcard, review session
 │   ├── search/             # Search view
 │   ├── stats/              # Stats charts
@@ -139,6 +142,7 @@ src/
 │   │   ├── client.ts       # Browser Supabase client
 │   │   ├── server.ts       # Server Supabase client
 │   │   └── types.ts        # TypeScript types + mastery helpers
+│   ├── auth.ts             # PIN session token (HMAC-SHA256)
 │   ├── constants.ts        # Category colors, icons
 │   ├── openrouter.ts       # OpenRouter API client
 │   ├── spaced-repetition.ts # SM-2 algorithm

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
   GraduationCap,
   BarChart3,
   Search,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
@@ -22,9 +23,16 @@ const navItems = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r bg-card md:block">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r bg-card md:flex md:flex-col">
       <div className="flex h-14 items-center justify-between border-b px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <GraduationCap className="h-5 w-5 text-primary" />
@@ -32,7 +40,7 @@ export function SidebarNav() {
         </Link>
         <ThemeToggle />
       </div>
-      <nav className="flex flex-col gap-1 p-3">
+      <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map((item) => {
           const isActive =
             item.href === "/"
@@ -54,6 +62,15 @@ export function SidebarNav() {
             </Link>
           );
         })}
+        <div className="mt-auto pt-3 border-t">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
+        </div>
       </nav>
     </aside>
   );

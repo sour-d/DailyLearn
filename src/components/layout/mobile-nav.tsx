@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
   GraduationCap,
   BarChart3,
-  Search,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,11 +16,17 @@ const navItems = [
   { href: "/categories", label: "Categories", icon: FolderOpen },
   { href: "/review", label: "Review", icon: GraduationCap },
   { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/search", label: "Search", icon: Search },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t bg-card md:hidden">
@@ -46,6 +52,13 @@ export function MobileNav() {
             </Link>
           );
         })}
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-0.5 px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+        >
+          <LogOut className="h-5 w-5" />
+          Logout
+        </button>
       </div>
     </nav>
   );

@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/layout/theme-provider";
-import { SidebarNav } from "@/components/layout/sidebar-nav";
-import { MobileNav } from "@/components/layout/mobile-nav";
+import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,13 +33,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <TooltipProvider>
-            <SidebarNav />
-            <main className="min-h-screen pb-16 md:pb-0 md:pl-60">
-              <div className="mx-auto max-w-6xl p-4 md:p-6 lg:p-8">
-                {children}
-              </div>
-            </main>
-            <MobileNav />
+            <AppShell>{children}</AppShell>
             <Toaster richColors closeButton />
           </TooltipProvider>
         </ThemeProvider>
