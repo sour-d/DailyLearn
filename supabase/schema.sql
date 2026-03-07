@@ -132,6 +132,20 @@ ALTER TABLE review_history DISABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_stats DISABLE ROW LEVEL SECURITY;
 ALTER TABLE app_config DISABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_generation_log DISABLE ROW LEVEL SECURITY;
+ALTER TABLE category_prompts DISABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 7. Category prompts (last-used AI prompt per category)
+-- ============================================
+CREATE TABLE category_prompts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_id UUID NOT NULL UNIQUE REFERENCES categories(id) ON DELETE CASCADE,
+  prompt TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_category_prompts_category ON category_prompts(category_id);
 
 -- ============================================
 -- Helper: auto-update updated_at on row change
@@ -154,4 +168,8 @@ CREATE TRIGGER entries_updated_at
 
 CREATE TRIGGER app_config_updated_at
   BEFORE UPDATE ON app_config
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER category_prompts_updated_at
+  BEFORE UPDATE ON category_prompts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

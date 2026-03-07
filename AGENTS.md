@@ -30,6 +30,7 @@ Schema changes are managed via numbered migration files in `supabase/migrations/
 |------|---------|
 | `supabase/migrations/001_initial_schema.sql` | Tables, indexes, triggers, seed data |
 | `supabase/migrations/002_disable_rls.sql` | Disable RLS for single-user app |
+| `supabase/migrations/003_category_prompts.sql` | Last-used AI prompt per category |
 | `supabase/migrate.sql` | Runner — paste into Supabase SQL Editor to apply all pending migrations |
 
 **Adding a new migration:**
@@ -64,12 +65,16 @@ Schema changes are managed via numbered migration files in `supabase/migrations/
 6. **ai_generation_log** - AI usage tracking
    - `id UUID PK`, `category_id` (FK CASCADE), `prompt`, `model`, `entries_generated`
 
+7. **category_prompts** - Last-used AI prompt per category
+   - `id UUID PK`, `category_id` (FK CASCADE, UNIQUE), `prompt`
+   - Auto-updated `created_at`, `updated_at` (trigger)
+
 ### Enums
 - `entry_type`: note, qa, snippet, vocabulary, link
 - `entry_source`: manual, ai
 
 ### Triggers
-- `update_updated_at()` on: categories, entries, app_config
+- `update_updated_at()` on: categories, entries, app_config, category_prompts
 
 ## Environment Variables
 

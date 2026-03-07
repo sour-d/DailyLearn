@@ -84,3 +84,26 @@ export async function deleteCategory(id: string) {
   revalidatePath("/categories");
   revalidatePath("/");
 }
+
+export async function getCategoryPrompt(categoryId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("category_prompts")
+    .select("prompt")
+    .eq("category_id", categoryId)
+    .single();
+
+  return data?.prompt ?? null;
+}
+
+export async function saveCategoryPrompt(categoryId: string, prompt: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("category_prompts")
+    .upsert(
+      { category_id: categoryId, prompt },
+      { onConflict: "category_id" }
+    );
+
+  if (error) throw new Error(error.message);
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { AiEntryPreview } from "./ai-entry-preview";
 import { AiQuickView } from "./ai-quick-view";
 import { createEntry } from "@/app/entries/_actions";
+import { getCategoryPrompt, saveCategoryPrompt } from "@/app/categories/_actions";
 import { Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import type { GeneratedEntry } from "@/lib/openrouter";
 import { toast } from "sonner";
@@ -33,19 +34,30 @@ export function GenerateDialog({
   categoryId,
   categoryName,
 }: GenerateDialogProps) {
-  const [prompt, setPrompt] = useState(
-    `Generate learning questions with detailed answers about ${categoryName}`
-  );
+  const defaultPrompt = `Generate learning questions with detailed answers about ${categoryName}`;
+  const [prompt, setPrompt] = useState(defaultPrompt);
   const [count, setCount] = useState(5);
   const [loading, setLoading] = useState(false);
+  const [loadingPrompt, setLoadingPrompt] = useState(false);
   const [entries, setEntries] = useState<GeneratedEntry[]>([]);
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
   const [savedCount, setSavedCount] = useState(0);
   const [previewEntry, setPreviewEntry] = useState<GeneratedEntry | null>(null);
 
+  useEffect(() => {
+    if (open) {
+      setLoadingPrompt(true);
+      getCategoryPrompt(categoryId)
+        .then((saved) => setPrompt(saved || defaultPrompt))
+        .catch(() => setPrompt(defaultPrompt))
+        .finally(() => setLoadingPrompt(false));
+    }
+  }, [open, categoryId, defaultPrompt]);
+
   async function handleGenerate() {
     setLoading(true);
     setSavedCount(0);
+    saveCategoryPrompt(categoryId, prompt).catch(() => {});
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -114,6 +126,7 @@ export function GenerateDialog({
                   rows={3}
                   placeholder="Describe what kind of questions you want..."
                   className="resize-none"
+                  disabled={loadingPrompt}
                 />
               </div>
 
@@ -130,7 +143,7 @@ export function GenerateDialog({
                     className="w-24"
                   />
                 </div>
-                <Button onClick={handleGenerate} disabled={loading} className="px-6">
+                <Button onClick={handleGenerate} disabled={loading || loadingPrompt} className="px-6">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
