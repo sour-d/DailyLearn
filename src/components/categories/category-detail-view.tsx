@@ -42,49 +42,45 @@ export function CategoryDetailView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-4">
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
           <Link
             href="/categories"
-            className="mt-1 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-lg"
+            style={{
+              backgroundColor: `${category.color}20`,
+              color: category.color,
+            }}
+          >
+            <CategoryIcon iconName={category.icon} className="h-5 w-5" />
+          </div>
           <div>
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-lg"
-                style={{
-                  backgroundColor: `${category.color}20`,
-                  color: category.color,
-                }}
-              >
-                <CategoryIcon iconName={category.icon} className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {category.name}
-                </h1>
-                {category.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {category.description}
-                  </p>
-                )}
-              </div>
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {category.name}
+            </h1>
+            {category.description && (
+              <p className="text-sm text-muted-foreground">
+                {category.description}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setGenerateOpen(true)}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="mr-2 h-4 w-4" />
             Generate with AI
           </Button>
-          <Button variant="outline" onClick={() => setBulkImportOpen(true)}>
+          <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
             <FileUp className="mr-2 h-4 w-4" />
             Bulk Import
           </Button>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Entry
           </Button>

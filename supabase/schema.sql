@@ -108,6 +108,16 @@ CREATE TABLE ai_generation_log (
 CREATE INDEX idx_ai_log_category ON ai_generation_log(category_id);
 
 -- ============================================
+-- RLS: Disable for single-user app (no auth)
+-- ============================================
+ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE entries DISABLE ROW LEVEL SECURITY;
+ALTER TABLE review_history DISABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_stats DISABLE ROW LEVEL SECURITY;
+ALTER TABLE app_config DISABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_generation_log DISABLE ROW LEVEL SECURITY;
+
+-- ============================================
 -- Helper: auto-update updated_at on row change
 -- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at()

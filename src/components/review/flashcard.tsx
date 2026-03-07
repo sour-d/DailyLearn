@@ -36,7 +36,7 @@ export function Flashcard({ entry, onReviewed, categoryColor }: FlashcardProps) 
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-2xl space-y-4 pb-4">
       {/* Question / Front */}
       <Card className="relative overflow-hidden">
         <div
@@ -91,9 +91,9 @@ export function Flashcard({ entry, onReviewed, categoryColor }: FlashcardProps) 
             </CardContent>
           </Card>
 
-          {/* Rating buttons */}
-          <div className="space-y-2">
-            <p className="text-center text-sm text-muted-foreground">
+          {/* Rating buttons — sticky at bottom */}
+          <div className="sticky bottom-0 z-10 rounded-lg border bg-card/95 p-4 shadow-lg backdrop-blur-sm">
+            <p className="mb-2 text-center text-sm text-muted-foreground">
               How well did you know this?
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -103,10 +103,10 @@ export function Flashcard({ entry, onReviewed, categoryColor }: FlashcardProps) 
                   variant="outline"
                   disabled={loading}
                   onClick={() => handleRate(opt.value)}
-                  className={cn("flex-col gap-0.5 py-4", opt.color)}
+                  className={cn("flex-col gap-0.5 py-3 h-auto", opt.color)}
                 >
                   <span className="font-semibold">{opt.label}</span>
-                  <span className="text-xs opacity-70">{opt.description}</span>
+                  <span className="text-[11px] opacity-70">{opt.description}</span>
                 </Button>
               ))}
             </div>
