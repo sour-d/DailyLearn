@@ -4,13 +4,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, Pencil, Save } from "lucide-react";
+import { Check, X, Pencil, Save, Eye } from "lucide-react";
 import type { GeneratedEntry } from "@/lib/openrouter";
 
 interface AiEntryPreviewProps {
   entry: GeneratedEntry;
   onSave: (entry: GeneratedEntry) => void;
   onDiscard: () => void;
+  onPreview?: (entry: GeneratedEntry) => void;
   saving?: boolean;
 }
 
@@ -18,6 +19,7 @@ export function AiEntryPreview({
   entry,
   onSave,
   onDiscard,
+  onPreview,
   saving,
 }: AiEntryPreviewProps) {
   const [editing, setEditing] = useState(false);
@@ -64,7 +66,13 @@ export function AiEntryPreview({
   }
 
   return (
-    <div className="group rounded-lg border bg-card p-4 transition-colors hover:border-primary/30">
+    <div
+      className="group rounded-lg border bg-card p-4 transition-colors hover:border-primary/30 cursor-pointer"
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("button")) return;
+        onPreview?.({ title, content, answer });
+      }}
+    >
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0 space-y-1.5">
           <h4 className="font-semibold leading-snug">{entry.title}</h4>
@@ -84,6 +92,15 @@ export function AiEntryPreview({
         </div>
 
         <div className="flex flex-col gap-1 shrink-0">
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            onClick={() => onPreview?.({ title, content, answer })}
+            title="Quick view"
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
           <Button
             size="icon"
             variant="outline"

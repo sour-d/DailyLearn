@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { AiEntryPreview } from "./ai-entry-preview";
+import { AiQuickView } from "./ai-quick-view";
 import { createEntry } from "@/app/entries/_actions";
 import { Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import type { GeneratedEntry } from "@/lib/openrouter";
@@ -40,6 +41,7 @@ export function GenerateDialog({
   const [entries, setEntries] = useState<GeneratedEntry[]>([]);
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
   const [savedCount, setSavedCount] = useState(0);
+  const [previewEntry, setPreviewEntry] = useState<GeneratedEntry | null>(null);
 
   async function handleGenerate() {
     setLoading(true);
@@ -88,97 +90,106 @@ export function GenerateDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!flex !flex-col max-w-2xl max-h-[85vh] overflow-hidden p-0">
-        <div className="shrink-0 p-6 pb-0">
-          <DialogHeader className="pb-4">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Generate with AI
-            </DialogTitle>
-            <DialogDescription>
-              Customize the prompt below and generate Q&A entries for {categoryName}.
-            </DialogDescription>
-          </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="!flex !flex-col max-w-2xl max-h-[85vh] overflow-hidden p-0">
+          <div className="shrink-0 p-6 pb-0">
+            <DialogHeader className="pb-4">
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Generate with AI
+              </DialogTitle>
+              <DialogDescription>
+                Customize the prompt below and generate Q&A entries for {categoryName}.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
-              <Textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={3}
-                placeholder="Describe what kind of questions you want..."
-                className="resize-none"
-              />
-            </div>
-
-            <div className="flex items-end gap-3">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="count">Count</Label>
-                <Input
-                  id="count"
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={count}
-                  onChange={(e) => setCount(Number(e.target.value))}
-                  className="w-24"
+                <Label htmlFor="prompt">Prompt</Label>
+                <Textarea
+                  id="prompt"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={3}
+                  placeholder="Describe what kind of questions you want..."
+                  className="resize-none"
                 />
               </div>
-              <Button onClick={handleGenerate} disabled={loading} className="px-6">
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate
-                  </>
-                )}
-              </Button>
+
+              <div className="flex items-end gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="count">Count</Label>
+                  <Input
+                    id="count"
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={count}
+                    onChange={(e) => setCount(Number(e.target.value))}
+                    className="w-24"
+                  />
+                </div>
+                <Button onClick={handleGenerate} disabled={loading} className="px-6">
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {(entries.length > 0 || savedCount > 0) && (
-          <div className="shrink-0 px-6">
-            <Separator className="mb-4" />
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium">
-                {entries.length} entries remaining
-              </p>
-              {savedCount > 0 && (
-                <p className="flex items-center gap-1.5 text-sm text-green-500">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  {savedCount} saved
+          {(entries.length > 0 || savedCount > 0) && (
+            <div className="shrink-0 px-6">
+              <Separator className="mb-4" />
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium">
+                  {entries.length} entries remaining
                 </p>
-              )}
+                {savedCount > 0 && (
+                  <p className="flex items-center gap-1.5 text-sm text-green-500">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {savedCount} saved
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {entries.length > 0 && (
-          <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-6">
-            <div className="space-y-3">
-              {entries.map((entry, i) => (
-                <AiEntryPreview
-                  key={`${entry.title}-${i}`}
-                  entry={entry}
-                  onSave={(e) => handleSaveEntry(i, e)}
-                  onDiscard={() => handleDiscard(i)}
-                  saving={savingIndex === i}
-                />
-              ))}
+          {entries.length > 0 && (
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-6">
+              <div className="space-y-3">
+                {entries.map((entry, i) => (
+                  <AiEntryPreview
+                    key={`${entry.title}-${i}`}
+                    entry={entry}
+                    onSave={(e) => handleSaveEntry(i, e)}
+                    onDiscard={() => handleDiscard(i)}
+                    onPreview={setPreviewEntry}
+                    saving={savingIndex === i}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {entries.length === 0 && <div className="pb-6" />}
-      </DialogContent>
-    </Dialog>
+          {entries.length === 0 && <div className="pb-6" />}
+        </DialogContent>
+      </Dialog>
+
+      <AiQuickView
+        entry={previewEntry}
+        open={previewEntry !== null}
+        onOpenChange={(open) => { if (!open) setPreviewEntry(null); }}
+      />
+    </>
   );
 }

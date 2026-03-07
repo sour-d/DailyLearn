@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { MoveEntriesDialog } from "./move-entries-dialog";
+import { EntryQuickView } from "./entry-quick-view";
 
 type SortField = "title" | "created_at" | "next_review_date" | "type";
 type SortDirection = "asc" | "desc";
@@ -75,6 +76,7 @@ export function EntryTable({
   const [filterMastery, setFilterMastery] = useState<string>("all");
   const [filterSource, setFilterSource] = useState<string>("all");
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [previewEntry, setPreviewEntry] = useState<Entry | null>(null);
 
   const filtered = useMemo(() => {
     let result = [...entries];
@@ -338,7 +340,15 @@ export function EntryTable({
                 const mastery = getMasteryLevel(entry);
                 const config = MASTERY_CONFIG[mastery];
                 return (
-                  <TableRow key={entry.id}>
+                  <TableRow
+                    key={entry.id}
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.closest("button, [role=checkbox], [role=menuitem], a")) return;
+                      setPreviewEntry(entry);
+                    }}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selected.has(entry.id)}
@@ -442,6 +452,15 @@ export function EntryTable({
         currentCategoryId={categoryId}
         categories={categories}
         onSuccess={() => setSelected(new Set())}
+      />
+
+      <EntryQuickView
+        entry={previewEntry}
+        open={previewEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewEntry(null);
+        }}
+        onEdit={onEditEntry}
       />
     </div>
   );
