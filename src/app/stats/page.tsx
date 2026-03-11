@@ -2,6 +2,8 @@ import { StatsView } from "@/components/stats/stats-view";
 import { getCategoriesWithStats, getAppConfig } from "@/app/_actions";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function StatsPage() {
   const [categories, config] = await Promise.all([
     getCategoriesWithStats(),

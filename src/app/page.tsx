@@ -1,6 +1,8 @@
 import { getAppConfig, getTodayStats, getCategoriesWithStats } from "./_actions";
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const [config, todayStats, categories] = await Promise.all([
     getAppConfig(),

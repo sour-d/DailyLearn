@@ -3,6 +3,8 @@ import { getCategoryById, getCategories } from "../_actions";
 import { getEntriesByCategory } from "@/app/entries/_actions";
 import { CategoryDetailView } from "@/components/categories/category-detail-view";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ id: string }>;
 }
