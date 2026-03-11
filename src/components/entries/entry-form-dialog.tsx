@@ -22,8 +22,13 @@ import {
 import { createEntry, updateEntry } from "@/app/entries/_actions";
 import type { Entry, EntryType } from "@/lib/supabase/types";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { X, Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ENTRY_TYPES: { value: EntryType; label: string }[] = [
   { value: "qa", label: "Q&A" },
@@ -54,6 +59,7 @@ export function EntryFormDialog({
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>(entry?.tags ?? []);
   const [loading, setLoading] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
 
   function addTag() {
     const tag = tagInput.trim().toLowerCase();
@@ -89,6 +95,29 @@ export function EntryFormDialog({
       case "qa": return "Answer";
       case "vocabulary": return "Definition";
       default: return "Notes / Explanation";
+    }
+  }
+
+  async function handleEnhance() {
+    if (!title.trim() && !content.trim()) {
+      toast.error("Add a title or content first");
+      return;
+    }
+    setEnhancing(true);
+    try {
+      const res = await fetch("/api/enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, answer, type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setAnswer(data.answer);
+      toast.success("Answer enhanced with AI");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Enhancement failed");
+    } finally {
+      setEnhancing(false);
     }
   }
 
@@ -189,7 +218,31 @@ export function EntryFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="answer">{getAnswerLabel()}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="answer">{getAnswerLabel()}</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+                    onClick={handleEnhance}
+                    disabled={enhancing || (!title.trim() && !content.trim())}
+                  >
+                    {enhancing ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" />
+                    )}
+                    {enhancing ? "Enhancing..." : "Enhance with AI"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  AI will generate or improve the answer based on the title and content
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <Textarea
               id="answer"
               placeholder="Markdown supported..."
