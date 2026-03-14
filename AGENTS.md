@@ -103,7 +103,7 @@ Simple PIN-based auth. A 6-digit PIN in `APP_PIN` env var protects the entire ap
 ### Server Actions
 - `src/app/categories/_actions/` - Category CRUD
 - `src/app/entries/_actions/` - Entry CRUD, bulk operations, favorites, daily stats
-- `src/app/review/_actions/` - Review queue, SM-2 submission, streak updates
+- `src/app/practice/_actions/` - Practice queue (per-category), extended queue, SM-2 submission, streak updates
 - `src/app/_actions/` - Dashboard data (config, today stats, categories with stats)
 
 ### API Routes (server-side, keeps API keys secure)
@@ -161,7 +161,7 @@ components/
 ├── dashboard/   - DashboardView
 ├── entries/     - EntryFormDialog, EntryTable, MoveEntriesDialog, MarkdownContent
 ├── layout/      - SidebarNav, MobileNav, ThemeToggle, ThemeProvider
-├── review/      - Flashcard, ReviewSession
+├── review/      - Flashcard, ReviewSession, PracticeCategories
 ├── search/      - SearchView
 ├── stats/       - StatsView
 └── ui/          - shadcn/ui base components

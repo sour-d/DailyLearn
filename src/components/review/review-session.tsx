@@ -1,86 +1,150 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Flashcard } from "./flashcard";
 import { CategoryIcon } from "@/components/categories/category-icon";
-import type { ReviewQueue } from "@/app/review/_actions";
-import { GraduationCap, RefreshCw, PartyPopper } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { getExtendedQueue } from "@/app/practice/_actions";
+import type { Category, Entry } from "@/lib/supabase/types";
+import {
+  Dumbbell,
+  ArrowLeft,
+  PartyPopper,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
 
 interface ReviewSessionProps {
-  queue: ReviewQueue[];
+  category: Category;
+  entries: Entry[];
+  totalDue: number;
 }
 
-export function ReviewSession({ queue }: ReviewSessionProps) {
-  const router = useRouter();
-
-  const allEntries = useMemo(
-    () =>
-      queue.flatMap((q) =>
-        q.entries.map((e) => ({ entry: e, category: q.category }))
-      ),
-    [queue]
-  );
-
+export function ReviewSession({ category, entries: initialEntries, totalDue }: ReviewSessionProps) {
+  const [entries, setEntries] = useState(initialEntries);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const totalEntries = allEntries.length;
+  const [isExtended, setIsExtended] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const totalEntries = entries.length;
+  const limitedCount = initialEntries.length;
+  const remaining = totalDue - limitedCount;
+  const hasMore = remaining > 0 && !isExtended;
 
   if (totalEntries === 0) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Review</h1>
-          <p className="text-muted-foreground">Daily flashcard review session</p>
+          <h1 className="text-3xl font-bold tracking-tight">Practice</h1>
+          <p className="text-muted-foreground">
+            {category.name} — nothing due right now
+          </p>
         </div>
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-          <GraduationCap className="h-12 w-12 text-muted-foreground/50" />
-          <h2 className="mt-4 text-lg font-semibold">No entries to review</h2>
+          <Dumbbell className="h-12 w-12 text-muted-foreground/50" />
+          <h2 className="mt-4 text-lg font-semibold">All caught up!</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            All caught up! Add more entries or check back tomorrow.
+            No entries due for this category. Check back later.
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentIndex >= totalEntries) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Review</h1>
-          <p className="text-muted-foreground">Daily flashcard review session</p>
-        </div>
-        <div className="flex flex-col items-center justify-center rounded-lg border p-12 text-center">
-          <PartyPopper className="h-12 w-12 text-primary" />
-          <h2 className="mt-4 text-lg font-semibold">Session complete!</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            You reviewed {totalEntries} entries. Great job!
-          </p>
-          <Button className="mt-4" onClick={() => router.refresh()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Start New Session
+          <Button asChild variant="outline" className="mt-4">
+            <Link href="/practice">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Practice
+            </Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  const current = allEntries[currentIndex];
+  const reachedLimit = currentIndex >= limitedCount && hasMore;
+  const sessionComplete = currentIndex >= totalEntries && !hasMore;
+
+  if (reachedLimit) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Practice</h1>
+          <p className="text-muted-foreground">{category.name}</p>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-lg border p-12 text-center">
+          <PartyPopper className="h-12 w-12 text-primary" />
+          <h2 className="mt-4 text-lg font-semibold">Daily limit reached!</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            You reviewed {limitedCount} entries. {remaining} more remaining in this category.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button
+              onClick={() => {
+                startTransition(async () => {
+                  const allEntries = await getExtendedQueue(category.id);
+                  setEntries(allEntries);
+                  setIsExtended(true);
+                });
+              }}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ChevronRight className="mr-2 h-4 w-4" />
+              )}
+              Continue More ({remaining} remaining)
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/practice">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Practice
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionComplete) {
+    const reviewed = isExtended ? totalEntries : limitedCount;
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Practice</h1>
+          <p className="text-muted-foreground">{category.name}</p>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-lg border p-12 text-center">
+          <PartyPopper className="h-12 w-12 text-primary" />
+          <h2 className="mt-4 text-lg font-semibold">Session complete!</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            You reviewed all {reviewed} entries. Great job!
+          </p>
+          <Button asChild variant="outline" className="mt-6">
+            <Link href="/practice">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Practice
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const current = entries[currentIndex];
   const progress = Math.round((currentIndex / totalEntries) * 100);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Review</h1>
-          <p className="text-muted-foreground">Daily flashcard review session</p>
+          <h1 className="text-3xl font-bold tracking-tight">Practice</h1>
+          <p className="text-muted-foreground">{category.name}</p>
         </div>
-        <Button variant="outline" onClick={() => router.refresh()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+        <Button asChild variant="outline" size="sm">
+          <Link href="/practice">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Categories
+          </Link>
         </Button>
       </div>
 
@@ -91,35 +155,29 @@ export function ReviewSession({ queue }: ReviewSessionProps) {
             <div
               className="flex h-6 w-6 items-center justify-center rounded"
               style={{
-                backgroundColor: `${current.category.color}20`,
-                color: current.category.color,
+                backgroundColor: `${category.color}20`,
+                color: category.color,
               }}
             >
-              <CategoryIcon iconName={current.category.icon} className="h-3 w-3" />
+              <CategoryIcon iconName={category.icon} className="h-3 w-3" />
             </div>
-            <span className="font-medium">{current.category.name}</span>
+            <span className="font-medium">{category.name}</span>
+            {isExtended && (
+              <span className="text-xs text-muted-foreground">(extended)</span>
+            )}
           </div>
-          <span className="text-muted-foreground">
+          <span className="text-muted-foreground tabular-nums">
             {currentIndex + 1} / {totalEntries}
           </span>
         </div>
         <Progress value={progress} className="h-2" />
-
-        {/* Category summary */}
-        <div className="flex flex-wrap gap-2">
-          {queue.map((q) => (
-            <Badge key={q.category.id} variant="outline" className="text-xs">
-              {q.category.name}: {q.entries.length}
-            </Badge>
-          ))}
-        </div>
       </div>
 
       {/* Flashcard */}
       <Flashcard
-        key={current.entry.id}
-        entry={current.entry}
-        categoryColor={current.category.color}
+        key={current.id}
+        entry={current}
+        categoryColor={category.color}
         onReviewed={() => setCurrentIndex((i) => i + 1)}
       />
     </div>

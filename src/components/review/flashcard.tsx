@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownContent } from "@/components/entries/markdown-content";
 import { RATING_OPTIONS } from "@/lib/spaced-repetition";
-import { submitReview } from "@/app/review/_actions";
+import { submitReview } from "@/app/practice/_actions";
 import type { Entry } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export function Flashcard({ entry, onReviewed, categoryColor }: FlashcardProps) 
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 pb-4">
+    <div className="mx-auto max-w-2xl space-y-4 pb-20 md:pb-4">
       {/* Question / Front */}
       <Card className="relative overflow-hidden">
         <div
@@ -91,22 +91,22 @@ export function Flashcard({ entry, onReviewed, categoryColor }: FlashcardProps) 
             </CardContent>
           </Card>
 
-          {/* Rating buttons — sticky at bottom */}
-          <div className="sticky bottom-0 z-10 rounded-lg border bg-card/95 p-4 shadow-lg backdrop-blur-sm">
-            <p className="mb-2 text-center text-sm text-muted-foreground">
+          {/* Rating buttons — sticky above mobile nav */}
+          <div className="sticky bottom-16 md:bottom-0 z-10 rounded-lg border bg-card/95 p-3 md:p-4 shadow-lg backdrop-blur-sm">
+            <p className="mb-2 text-center text-xs md:text-sm text-muted-foreground">
               How well did you know this?
             </p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5 md:gap-2">
               {RATING_OPTIONS.map((opt) => (
                 <Button
                   key={opt.value}
                   variant="outline"
                   disabled={loading}
                   onClick={() => handleRate(opt.value)}
-                  className={cn("flex-col gap-0.5 py-3 h-auto", opt.color)}
+                  className={cn("flex-col gap-0.5 py-2 md:py-3 h-auto", opt.color)}
                 >
-                  <span className="font-semibold">{opt.label}</span>
-                  <span className="text-[11px] opacity-70">{opt.description}</span>
+                  <span className="text-xs md:text-sm font-semibold">{opt.label}</span>
+                  <span className="text-[10px] md:text-[11px] opacity-70 hidden sm:inline">{opt.description}</span>
                 </Button>
               ))}
             </div>

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
-  GraduationCap,
+  Dumbbell,
   BarChart3,
   LogOut,
 } from "lucide-react";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "Home", icon: LayoutDashboard },
   { href: "/categories", label: "Categories", icon: FolderOpen },
-  { href: "/review", label: "Review", icon: GraduationCap },
+  { href: "/practice", label: "Practice", icon: Dumbbell },
   { href: "/stats", label: "Stats", icon: BarChart3 },
 ];
 

@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CategoryIcon } from "@/components/categories/category-icon";
 import {
-  GraduationCap,
+  Dumbbell,
   Flame,
   Trophy,
   Target,
   BookOpen,
   ArrowRight,
   PartyPopper,
+  GraduationCap,
 } from "lucide-react";
 import type { AppConfig, DailyStats, CategoryWithStats } from "@/lib/supabase/types";
 
@@ -105,19 +106,19 @@ export function DashboardView({
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
-              <GraduationCap className="h-8 w-8 text-primary" />
+              <Dumbbell className="h-8 w-8 text-primary" />
               <div>
                 <p className="font-semibold">
-                  You have {totalDue} entries to review today
+                  You have {totalDue} entries to practice today
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Start your daily review session
+                  Start your daily practice session
                 </p>
               </div>
             </div>
             <Button asChild>
-              <Link href="/review">
-                Start Review
+              <Link href="/practice">
+                Start Practice
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

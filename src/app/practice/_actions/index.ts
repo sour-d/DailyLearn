@@ -5,40 +5,60 @@ import { revalidatePath } from "next/cache";
 import { calculateSM2 } from "@/lib/spaced-repetition";
 import type { Entry, Category } from "@/lib/supabase/types";
 
-export interface ReviewQueue {
+export interface PracticeQueue {
   category: Category;
   entries: Entry[];
+  totalDue: number;
 }
 
-export async function getReviewQueue(): Promise<ReviewQueue[]> {
+export async function getPracticeQueue(categoryId: string): Promise<PracticeQueue | null> {
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: categories } = await supabase
+  const { data: category } = await supabase
     .from("categories")
     .select("*")
-    .order("name");
+    .eq("id", categoryId)
+    .single();
 
-  if (!categories || categories.length === 0) return [];
+  if (!category) return null;
 
-  const queue: ReviewQueue[] = [];
+  const { count: totalDue } = await supabase
+    .from("entries")
+    .select("*", { count: "exact", head: true })
+    .eq("category_id", categoryId)
+    .eq("is_archived", false)
+    .lte("next_review_date", today);
 
-  for (const category of categories) {
-    const { data: entries } = await supabase
-      .from("entries")
-      .select("*")
-      .eq("category_id", category.id)
-      .eq("is_archived", false)
-      .lte("next_review_date", today)
-      .order("next_review_date", { ascending: true })
-      .limit(category.daily_review_limit);
+  const { data: entries } = await supabase
+    .from("entries")
+    .select("*")
+    .eq("category_id", categoryId)
+    .eq("is_archived", false)
+    .lte("next_review_date", today)
+    .order("next_review_date", { ascending: true })
+    .limit(category.daily_review_limit);
 
-    if (entries && entries.length > 0) {
-      queue.push({ category, entries });
-    }
-  }
+  return {
+    category,
+    entries: entries ?? [],
+    totalDue: totalDue ?? 0,
+  };
+}
 
-  return queue;
+export async function getExtendedQueue(categoryId: string): Promise<Entry[]> {
+  const supabase = await createClient();
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: entries } = await supabase
+    .from("entries")
+    .select("*")
+    .eq("category_id", categoryId)
+    .eq("is_archived", false)
+    .lte("next_review_date", today)
+    .order("next_review_date", { ascending: true });
+
+  return entries ?? [];
 }
 
 export async function submitReview(entryId: string, rating: number) {
@@ -77,7 +97,6 @@ export async function submitReview(entryId: string, rating: number) {
     rating,
   });
 
-  // Update daily stats
   const today = new Date().toISOString().split("T")[0];
   const { data: existing } = await supabase
     .from("daily_stats")
@@ -97,10 +116,9 @@ export async function submitReview(entryId: string, rating: number) {
     });
   }
 
-  // Update streak
   await updateStreak();
 
-  revalidatePath("/review");
+  revalidatePath("/practice");
   revalidatePath("/");
 }
 
@@ -141,28 +159,4 @@ async function updateStreak() {
       last_active_date: today,
     })
     .eq("id", config.id);
-}
-
-export async function refreshReviewQueue(categoryId: string): Promise<Entry[]> {
-  const supabase = await createClient();
-  const today = new Date().toISOString().split("T")[0];
-
-  const { data: category } = await supabase
-    .from("categories")
-    .select("daily_review_limit")
-    .eq("id", categoryId)
-    .single();
-
-  if (!category) return [];
-
-  const { data: entries } = await supabase
-    .from("entries")
-    .select("*")
-    .eq("category_id", categoryId)
-    .eq("is_archived", false)
-    .lte("next_review_date", today)
-    .order("next_review_date", { ascending: true })
-    .limit(category.daily_review_limit);
-
-  return entries ?? [];
 }

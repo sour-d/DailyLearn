@@ -5,10 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
-  GraduationCap,
+  Dumbbell,
   BarChart3,
   Search,
   LogOut,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
@@ -16,7 +17,7 @@ import { ThemeToggle } from "./theme-toggle";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/categories", label: "Categories", icon: FolderOpen },
-  { href: "/review", label: "Review", icon: GraduationCap },
+  { href: "/practice", label: "Practice", icon: Dumbbell },
   { href: "/stats", label: "Stats", icon: BarChart3 },
   { href: "/search", label: "Search", icon: Search },
 ];
